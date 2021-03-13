@@ -51,8 +51,13 @@ def expand(current):
 def rollout(current):
     return current
 
-#backpropagation.  
+#backpropagation. traverse back up the tree.  increment times visited.  add rollout result to total result 
 def backpropagate(current, value):
+    parent = current.parent
+    while(parent): #make sure this is correct and can get to root
+        parent.n += 1
+        parent.t += value
+        parent = parent.parent
     return value
 
 #find child with the highest ubc1
@@ -79,5 +84,6 @@ def ubc1(v, ni, n0):
         result = avg_score + expl_constant * math.sqrt((math.log(n0)/ni))
     return result
 
-#create root
+#create root and start
 root = Node()
+mcts(root)
