@@ -7,7 +7,7 @@
 # 4. backpropagation. add the rollout value to it's parent nodes up to root
 # 
 # after x time or number of iterations, take the action that results in a higher average value
-# UCB1(Si) = v/ni + c * sqrt(ln(n0)/ni) = avg score at that state + exploration parameter (probably just 2) * sqrt((ln(total number of rollouts)/number of rollouts for this state)
+# UCB1(Si) = v/ni + c * sqrt(ln(n0)/ni) = avg score at that state + exploration parameter (probably just 2) * sqrt((ln(total number of simulations)/number of rollouts for this state)
 
 #imports
 import math
@@ -21,10 +21,63 @@ class Node:
         self.parent = None
         self.children = []
 
+#main loop (currently pseudocode)
+def mcts(root):
+    simulation_limit = 10
+    while(simulation_limit >= 0):
+        leaf = traverse(root)
+        #expansion happens in traverse.  easier to manage when to expand
+        simulation = rollout(leaf) #returns result of simulation
+        backpropagate(leaf, simulation)
+        simulation_limit -= 1
+        
+#traverse to a leaf using ubc1
+def traverse(current):
+    while(len(current.children) != 0):
+        current = next_child(current)
+    
+    #if the node has been visited, expand
+    if(current.n != 0):
+        current = expand(current)
+    
+    return current
+
+#expansion.  get possible actions from game.  create new child nodes with resulting states.  return first new child node
+def expand(current):
+    return current
+
+
+#rollout.  simulate a random game.  stop at a terminal node.  return result of terminal node
+def rollout(current):
+    return current
+
+#backpropagation.  
+def backpropagate(current, value):
+    return value
+
+#find child with the highest ubc1
+def next_child(parent):
+    #should not hit this if statement.  add better error checking
+    if(len(parent.children) == 0):
+        return None
+    highest = -1
+    next_child = None
+    for n in parent.children:
+        n_val = ubc1(n.t, n.n, root.n)
+        if ( n_val > highest):
+            highest = n_val
+            next_child = n
+    return n
 
 # basic ubc1 implementation
 def ubc1(v, ni, n0):
     avg_score = v/ni
     expl_constant = 2
-    result = avg_score + expl_constant * math.sqrt((math.log(n0)/ni))
+    if(ni == 0):
+        result = 100000 #avoiding division by zero
+    else: 
+        result = avg_score + expl_constant * math.sqrt((math.log(n0)/ni))
     return result
+
+#create root
+root = Node()
