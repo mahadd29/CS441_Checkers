@@ -108,7 +108,7 @@ def min_value(game, depth, alpha, beta):
         compare = max_value(next_move, depth+1, alpha, beta)
         if compare < minVal:
             minVal = compare
-        beta = min(beta, compare)
+        beta = min(beta, minVal)
         if beta <= alpha:
             break
     return minVal
@@ -140,7 +140,7 @@ def max_value(game, depth, alpha, beta):
         compare = min_value(next_move, depth+1, alpha, beta)
         if compare > maxVal:                    
             maxVal = compare
-        alpha = max(alpha, compare)
+        alpha = max(alpha, maxVal)
         if beta <= alpha:
             break   
             #chosen_move = next_move
