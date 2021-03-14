@@ -208,9 +208,37 @@ def display(game):
                 board[x][y] = 20
             else: board[x][y] = 2
     print(board)
+    
+def display_move(game, move):
+    origin_x, origin_y = board_mapping(move[0]) 
+    dest_x, dest_y = board_mapping(move[1]) 
+    
+    board = np.zeros(64).astype(int)
+    board = board.reshape(8,8)
+    for piece in game.board.pieces:
+        if not piece.captured:
+            x, y = board_mapping(piece.position)
+            if piece.player == 1:
+                if piece.king:
+                    board[x][y] = 10
+                else: board[x][y] = 1
+            elif piece.king:
+                board[x][y] = 20
+            else: board[x][y] = 2
+    
+    for row in range(8):
+            if row == origin_x:
+                print(board[row], end=" ")
+                print("<--From Posistion: " + str(origin_y))    
+            elif row == dest_x:
+                print(board[row], end=" ")
+                print("<--To Position: " + str(dest_y))
+            else: print(board[row])
+
 
 if __name__ == "__main__":
     game1 = Game()
+    display_move(game1,[1, 5])
   
     while(not game1.is_over()):
         next_move = minimax(game1)
