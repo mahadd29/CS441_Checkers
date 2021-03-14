@@ -1,8 +1,12 @@
+
+from mcts.mcts import mcts_root, mcts, MCTSNode
 from checkers.game import Game
 
 #setup a board
 game = Game()
+print(game)
 
 #initialize agents
+mcts(mcts_root)
 
-#loop, alternating agents until someone wins
+print(mcts_root)
