@@ -47,7 +47,9 @@ import copy
 
 # function Terminal-Test(state) returns True or False
 #   return game.is_over()
+
 MAX_DEPTH = 1
+
 def h1_total_pieces(game_board):
    p1_count = p2_count = 0.0
    p1_pieces = game_board.board.searcher.get_pieces_by_player(1)
@@ -82,7 +84,7 @@ def min_value(game, depth):
     if game.is_over():
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
         ret = game.get_winner()
-        print("game winner: "+ str(ret))
+        #print("game winner: "+ str(ret))
         if ret == 1:
             return ret+9
         elif ret == 2:
@@ -97,8 +99,8 @@ def min_value(game, depth):
     
     all_moves = game.get_possible_moves()
     for a in reversed(all_moves):
-        print("working on " + str(a) + "in the following list:")
-        print(game.get_possible_moves())
+        #print("working on " + str(a) + "in the following list:")
+        #print(game.get_possible_moves())
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
         compare = max_value(next_move, depth+1)
@@ -112,7 +114,7 @@ def max_value(game, depth):
     if game.is_over():
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
         ret = game.get_winner()
-        print("game winner: "+ str(ret))
+        #print("game winner: "+ str(ret))
         if ret == 1:
             return ret+9
         elif ret == 2:
@@ -127,8 +129,8 @@ def max_value(game, depth):
     
     all_moves = game.get_possible_moves()
     for a in reversed(all_moves):
-        print("working on " + str(a) + "in the following list:")
-        print(game.get_possible_moves())
+        #print("working on " + str(a) + "in the following list:")
+        #print(game.get_possible_moves())
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
         compare = min_value(next_move, depth+1)
@@ -138,15 +140,24 @@ def max_value(game, depth):
     return alpha
 
 def minimax(game):
-    score = max_value(game, 0)
-    return score
+    max_score = -10000
+    move = None
+    for a in game.get_possible_moves():
+        game_copy = copy.deepcopy(game)
+        next_move = game_copy.move(a)
+        compare = max_value(next_move,0)
+        if compare > max_score:
+            max_score = compare
+            move = a
+    return move
  
 
 if __name__ == "__main__":
-
     game1 = Game()
     while(not game1.is_over()):
         next_move = minimax(game1)
-        possible_moves = game1.board.get_possible_moves()
+        print("Taking move: " + str(next_move))
         game1.move(next_move)
+    
+    print("game winner: "+ str(game1.get_winner()))
         
