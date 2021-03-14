@@ -50,7 +50,7 @@ import time
 # function Terminal-Test(state) returns True or False
 #   return game.is_over()
 
-MAX_DEPTH = 2
+MAX_DEPTH = 3
 
 def h1_total_pieces(game_board):
    p1_count = p2_count = 0.0
@@ -82,7 +82,7 @@ def h2_kings_and_reg(game_board):
        return p1_points
    return (p1_points/p2_points)
 
-def min_value(game, depth):
+def min_value(game, depth, alpha, beta):
     if game.is_over():
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
         ret = game.get_winner()
@@ -96,8 +96,8 @@ def min_value(game, depth):
     if depth == MAX_DEPTH:
         return (h1_total_pieces(game) + h2_kings_and_reg(game))
 
-    beta = 100000
-    #chosen_move = None
+    minVal = 100000
+
     
     all_moves = game.get_possible_moves()
     for a in reversed(all_moves):
@@ -105,14 +105,16 @@ def min_value(game, depth):
         #print(game.get_possible_moves())
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
-        compare = max_value(next_move, depth+1)
-        if compare < beta:
-            beta = compare
-            #chosen_move = next_move
-    return beta
+        compare = max_value(next_move, depth+1, alpha, beta)
+        if compare < minVal:
+            minVal = compare
+        beta = min(beta, compare)
+        if beta <= alpha:
+            break
+    return minVal
 
 # returns a utility value
-def max_value(game, depth):
+def max_value(game, depth, alpha, beta):
     if game.is_over():
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
         ret = game.get_winner()
@@ -126,7 +128,7 @@ def max_value(game, depth):
     if depth == MAX_DEPTH:
         return (h1_total_pieces(game) + h2_kings_and_reg(game))
 
-    alpha = -100000
+    maxVal = -100000
     #chosen_move = None
     
     all_moves = game.get_possible_moves()
@@ -135,11 +137,14 @@ def max_value(game, depth):
         #print(game.get_possible_moves())
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
-        compare = min_value(next_move, depth+1)
-        if compare > alpha:                    
-            alpha = compare
+        compare = min_value(next_move, depth+1, alpha, beta)
+        if compare > maxVal:                    
+            maxVal = compare
+        alpha = max(alpha, compare)
+        if beta <= alpha:
+            break   
             #chosen_move = next_move
-    return alpha
+    return maxVal
 
 def minimax(game):
     max_score = -10000
@@ -147,7 +152,7 @@ def minimax(game):
     for a in game.get_possible_moves():
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
-        compare = max_value(next_move,0)
+        compare = max_value(next_move,0, -100000, 100000)
         if compare > max_score:
             max_score = compare
             move = a
