@@ -47,7 +47,7 @@ import copy
 
 # function Terminal-Test(state) returns True or False
 #   return game.is_over()
-
+MAX_DEPTH = 1
 def h1_total_pieces(game_board):
    p1_count = p2_count = 0.0
    p1_pieces = game_board.board.searcher.get_pieces_by_player(1)
@@ -78,66 +78,75 @@ def h2_kings_and_reg(game_board):
        return p1_points
    return (p1_points/p2_points)
 
-def min_value(game):
+def min_value(game, depth):
     if game.is_over():
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
         ret = game.get_winner()
+        print("game winner: "+ str(ret))
         if ret == 1:
-            return ret, game
+            return ret+9
         elif ret == 2:
-            return -1, game
+            return -1
         else:
-            return 0, game
+            return 0
+    if depth == MAX_DEPTH:
+        return (h1_total_pieces(game) + h2_kings_and_reg(game))
 
     beta = 100000
-    best_move = None
-   # game_copy = game
-    for a in game.get_possible_moves():
-        game_copy = copy.deepcopy(game)
-        next_move = game_copy.move(a)
-        compare, compare_move = max_value(next_move)
-        if compare < beta:
-            beta = compare
-            best_move = compare_move
-    return beta, best_move
-
-# returns a utility value
-def max_value(game):
-    if game.is_over():
-        #return h1_total_pieces(game) + h2_kings_and_reg(game)
-        ret = game.get_winner()
-        if ret == 1:
-            return ret, game
-        elif ret == 2:
-            return -1, game
-        else:
-            return 0, game
-
-    alpha = -100000
-    best_move = None
-
-    for a in game.get_possible_moves():
+    #chosen_move = None
+    
+    all_moves = game.get_possible_moves()
+    for a in reversed(all_moves):
         print("working on " + str(a) + "in the following list:")
         print(game.get_possible_moves())
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
-        compare, compare_move = min_value(next_move)
-        if compare > alpha:
+        compare = max_value(next_move, depth+1)
+        if compare < beta:
+            beta = compare
+            #chosen_move = next_move
+    return beta
+
+# returns a utility value
+def max_value(game, depth):
+    if game.is_over():
+        #return h1_total_pieces(game) + h2_kings_and_reg(game)
+        ret = game.get_winner()
+        print("game winner: "+ str(ret))
+        if ret == 1:
+            return ret+9
+        elif ret == 2:
+            return -1
+        else:
+            return 0
+    if depth == MAX_DEPTH:
+        return (h1_total_pieces(game) + h2_kings_and_reg(game))
+
+    alpha = -100000
+    #chosen_move = None
+    
+    all_moves = game.get_possible_moves()
+    for a in reversed(all_moves):
+        print("working on " + str(a) + "in the following list:")
+        print(game.get_possible_moves())
+        game_copy = copy.deepcopy(game)
+        next_move = game_copy.move(a)
+        compare = min_value(next_move, depth+1)
+        if compare > alpha:                    
             alpha = compare
-            best_move = compare_move
-    return alpha, best_move
+            #chosen_move = next_move
+    return alpha
 
 def minimax(game):
-    score, action = max_value(game)
-    return action
-
-
-
-
+    score = max_value(game, 0)
+    return score
+ 
 
 if __name__ == "__main__":
+
     game1 = Game()
-    
-    next_move = minimax(game1)
-    #game1.move(next_move)
+    while(not game1.is_over()):
+        next_move = minimax(game1)
+        possible_moves = game1.board.get_possible_moves()
+        game1.move(next_move)
         
