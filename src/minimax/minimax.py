@@ -6,7 +6,7 @@
 from checkers.game import Game
 import copy
 import numpy as np
-
+import time
 # minimax(s) =
 # {
 #    Utility(s)                                         if Terminal-Test(s)
@@ -241,7 +241,9 @@ if __name__ == "__main__":
     display_move(game1,[1, 5])
   
     while(not game1.is_over()):
+        start = time.time()
         next_move = minimax(game1)
+        print("Time to find next move: " + str(time.time() - start), end=" ")
         print("Taking move: " + str(next_move))
         game1.move(next_move)
         display(game1)
