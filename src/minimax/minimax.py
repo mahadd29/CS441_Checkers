@@ -6,6 +6,7 @@
 from checkers.game import Game
 import copy
 import numpy as np
+import time
 
 # minimax(s) =
 # {
@@ -49,7 +50,7 @@ import numpy as np
 # function Terminal-Test(state) returns True or False
 #   return game.is_over()
 
-MAX_DEPTH = 1
+MAX_DEPTH = 2
 
 def h1_total_pieces(game_board):
    p1_count = p2_count = 0.0
@@ -238,13 +239,15 @@ def display_move(game, move):
 
 if __name__ == "__main__":
     game1 = Game()
-    display_move(game1,[1, 5])
+
   
     while(not game1.is_over()):
+        start = time.time()
         next_move = minimax(game1)
+        print("Time to find next move: " + str(time.time() - start), end=" ")
         print("Taking move: " + str(next_move))
         game1.move(next_move)
-        display(game1)
+        display_move(game1, next_move)
     
     print("game winner: "+ str(game1.get_winner()))
         
