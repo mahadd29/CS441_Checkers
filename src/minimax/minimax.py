@@ -4,6 +4,7 @@
 # Authors: Dominique Moore, Alex Salazar
 
 from checkers.game import Game
+import copy
 
 # minimax(s) =
 # {
@@ -82,19 +83,23 @@ def min_value(game):
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
         ret = game.get_winner()
         if ret == 1:
-            return ret
-        else if ret == 2:
-            return -1
+            return ret, game
+        elif ret == 2:
+            return -1, game
         else:
-            return 0
+            return 0, game
 
     beta = 100000
+    best_move = None
+   # game_copy = game
     for a in game.get_possible_moves():
-        next_move = game.move(a)
-        compare = max_value(next_move)
+        game_copy = copy.deepcopy(game)
+        next_move = game_copy.move(a)
+        compare, compare_move = max_value(next_move)
         if compare < beta:
             beta = compare
-    return beta
+            best_move = compare_move
+    return beta, best_move
 
 # returns a utility value
 def max_value(game):
@@ -102,23 +107,37 @@ def max_value(game):
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
         ret = game.get_winner()
         if ret == 1:
-            return ret
-        else if ret == 2:
-            return -1
+            return ret, game
+        elif ret == 2:
+            return -1, game
         else:
-            return 0
+            return 0, game
 
     alpha = -100000
+    best_move = None
+
     for a in game.get_possible_moves():
-        next_move = game.move(a)
-        compare = min_value(next_move)
+        print("working on " + str(a) + "in the following list:")
+        print(game.get_possible_moves())
+        game_copy = copy.deepcopy(game)
+        next_move = game_copy.move(a)
+        compare, compare_move = min_value(next_move)
         if compare > alpha:
             alpha = compare
-    return alpha
+            best_move = compare_move
+    return alpha, best_move
 
 def minimax(game):
+    score, action = max_value(game)
+    return action
+
+
 
 
 
 if __name__ == "__main__":
     game1 = Game()
+    
+    next_move = minimax(game1)
+    #game1.move(next_move)
+        
