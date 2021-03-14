@@ -59,8 +59,6 @@ def traverse(state):
         state = next_child(state)
     return state
 
-def apply_action(state, action):
-    return 
 
 # Expansion
 # Steps:
