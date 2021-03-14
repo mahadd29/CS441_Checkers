@@ -49,7 +49,7 @@ import time
 # function Terminal-Test(state) returns True or False
 #   return game.is_over()
 
-MAX_DEPTH = 1
+MAX_DEPTH = 5
 
 def h1_total_pieces(game_board):
    p1_count = p2_count = 0.0
@@ -238,15 +238,17 @@ def display_move(game, move):
 
 if __name__ == "__main__":
     game1 = Game()
-    display_move(game1,[1, 5])
+    #display_move(game1,[1, 5])
   
     while(not game1.is_over()):
         start = time.time()
         next_move = minimax(game1)
-        print("Time to find next move: " + str(time.time() - start), end=" ")
+        print("For depth " + str(MAX_DEPTH) + ", ", end="")
+        print("time to find next move is " + str(time.time() - start) + ". ", end=" ")
         print("Taking move: " + str(next_move))
         game1.move(next_move)
-        display(game1)
+       # display(game1)
+        break
     
     print("game winner: "+ str(game1.get_winner()))
         
