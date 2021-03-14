@@ -5,6 +5,7 @@
 
 from checkers.game import Game
 import copy
+import numpy as np
 
 # minimax(s) =
 # {
@@ -150,14 +151,72 @@ def minimax(game):
             max_score = compare
             move = a
     return move
- 
+def board_mapping(p):
+    if p == 1: return 0, 1
+    if p == 2: return 0, 3
+    if p == 3: return 0, 5
+    if p == 4: return 0, 7
+    
+    if p == 5: return 1, 0
+    if p == 6: return 1, 2
+    if p == 7: return 1, 4
+    if p == 8: return 1, 6
+    
+    if p == 9: return 2, 1
+    if p == 10: return 2, 3
+    if p == 11: return 2, 5
+    if p == 12: return 2, 7
+    
+    if p == 13: return 3, 0
+    if p == 14: return 3, 2
+    if p == 15: return 3, 4
+    if p == 16: return 3, 6
+    
+    if p == 17: return 4, 1
+    if p == 18: return 4, 3
+    if p == 19: return 4, 5
+    if p == 20: return 4, 7
+    
+    if p == 21: return 5, 0
+    if p == 22: return 5, 2
+    if p == 23: return 5, 4
+    if p == 24: return 5, 6
+    
+    if p == 25: return 6, 1
+    if p == 26: return 6, 3
+    if p == 27: return 6, 5
+    if p == 28: return 6, 7
+    
+    if p == 29: return 7, 0
+    if p == 30: return 7, 2
+    if p == 31: return 7, 4
+    if p == 32: return 7, 6
+    
+    
+    
+def display(game):
+    board = np.zeros(64).astype(int)
+    board = board.reshape(8,8)
+    for piece in game.board.pieces:
+        if not piece.captured:
+            x, y = board_mapping(piece.position)
+            if piece.player == 1:
+                if piece.king:
+                    board[x][y] = 10
+                else: board[x][y] = 1
+            elif piece.king:
+                board[x][y] = 20
+            else: board[x][y] = 2
+    print(board)
 
 if __name__ == "__main__":
     game1 = Game()
+  
     while(not game1.is_over()):
         next_move = minimax(game1)
         print("Taking move: " + str(next_move))
         game1.move(next_move)
+        display(game1)
     
     print("game winner: "+ str(game1.get_winner()))
         
