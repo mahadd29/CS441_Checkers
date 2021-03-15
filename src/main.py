@@ -1,10 +1,10 @@
 
 from mcts.mcts import mcts_root, mcts, MCTSNode
+from gui.window import GameWindow
 from checkers.game import Game
 
-#setup a board
-game = Game()
-print(game)
+window = GameWindow(800)
 
-#initialize agents
-mcts(mcts_root)
+while True:
+    window.clock.tick(60)
+    window.update(game.board)
