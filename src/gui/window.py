@@ -33,8 +33,11 @@ class GameWindow:
             col = ((32-piece.position) % 4) * 2 * self.square_size + self.square_size/2 + ((((32 - piece.position) // 4) + 1)%2) * self.square_size
             row = ((32-piece.position) // 4)  * self.square_size + self.square_size/2 
             center = (col, row)
-            color = (255, 255, 255)
+            color = [150, 150, 150]
             if piece.player != 1:
-                color = (50, 50, 50)
+                color = [50, 50, 50]
+            if piece.king:
+                color[2] = 200
+            color = tuple(color)
             pygame.draw.circle(self.window, color, center, self.piece_radius)
         pygame.display.update()

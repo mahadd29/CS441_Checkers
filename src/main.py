@@ -1,5 +1,6 @@
 
 from mcts.mcts import mcts, mcts_root, MCTSNode, get_all_possible_moves
+from minimax.minimax import minimax
 from gui.window import GameWindow
 from checkers.game import Game
 
@@ -37,18 +38,18 @@ def main():
             break
         
         if game.whose_turn() == 1:
-            (node, move) = mcts(mcts_root)
-            print("MCTS chooses node with " + str(node.t) + "/" + str(node.n) + " score")
-            custom_move_function(game, move)
-            mcts_root = node
+            (mcts_child, mcts_move) = mcts(mcts_root)
+            custom_move_function(game, mcts_move)
+            mcts_root = mcts_child
+            print("MCTS chooses node with " + str(mcts_child.t) + "/" + str(mcts_child.n) + " score")
         
         else:
-            possible_moves = get_all_possible_moves(game.board)
-            move = random.choice(possible_moves)
-            custom_move_function(game, move)
+            minimax_move = minimax(game)
+            custom_move_function(game, minimax_move)
             time.sleep(0.25)
             next_mcts_start = find_state(mcts_root, game.board)
             mcts_root = next_mcts_start if next_mcts_start != None else MCTSNode(game.board, None, None)
+            print("Minimax chooses a move")
 
         move_count += 1
     
