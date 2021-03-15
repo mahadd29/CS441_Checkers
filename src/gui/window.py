@@ -5,8 +5,6 @@ from checkers.board_searcher import BoardSearcher
 
 class GameWindow:
     def __init__(self, resolution):
-        pygame.init()
-        pygame.font.init()
         self.window = pygame.display.set_mode((resolution, resolution))
         pygame.display.set_caption("Checkers")
 
