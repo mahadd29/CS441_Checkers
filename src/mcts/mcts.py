@@ -15,47 +15,47 @@ import random
 from copy import deepcopy
 from checkers.board import Board
 
-
 #state node class
 class MCTSNode:
-    def __init__(self, board, action):
+    def __init__(self, board, action, parent):
         self.action = action # 2 element array holding the move that leads to this state
         self.board = board # A board representing the current state before applying action
         self.t = 0 #total score
         self.n = 0 #number of times visited
-        self.parent = None
+        self.parent = parent
         self.children = []
 
 # main loop (currently pseudocode)
 def mcts(root):
-    simulation_limit = 1000
-    while(simulation_limit >= 0):
-        leaf = traverse(root)
+    simulation_limit = 100
+    while simulation_limit > 0:
+        leaf = traverse(root, root.n)
         if leaf.n != 0:
             leaf = expand(leaf)
-        simulation_result = rollout(leaf, 1, 10000)            
+            if leaf == None:
+                break
+        simulation_result = rollout(leaf, 1, 50)
         backpropagate(leaf, simulation_result)
         simulation_limit -= 1
-    
+        
     best_child = None
     best_n = -1
     for child in root.children:
         if child.n > best_n:
             best_child = child
             best_n = child.n
-    print(str(best_child.t) + "/" + str(best_child.n))
-    return best_child.action
+    return (best_child, best_child.action)
     
 
 #find child with the highest ubc1
-def next_child(parent):
+def next_child(parent, total_simulations):
     #should not hit this if statement.  add better error checking
     if(len(parent.children) == 0):
         return None
     highest = -1
     next_child = None
     for n in parent.children:
-        n_val = ucb1(n)
+        n_val = ucb1(n, total_simulations)
         if ( n_val > highest):
             highest = n_val
             next_child = n
@@ -67,11 +67,18 @@ def next_child(parent):
 # Return values:
 #   state - returns the current node if it has no children to traverse to
 #   best child - returns the child with the highest UCB1 score
-def traverse(state):
+def traverse(state, total_simulations):
     while(len(state.children) != 0):
-        state = next_child(state)
+        state = next_child(state, total_simulations)
     return state
 
+# Gets the possible moves from a current state
+# Parameters:
+#   board - the board at an input state
+# Return values:
+#   actions - a list of all the actions that can be taken from the state
+def get_all_possible_moves(board):
+    return board.get_possible_capture_moves() + board.get_possible_positional_moves()
 
 # Expansion
 # Steps:
@@ -82,11 +89,10 @@ def traverse(state):
 # Return values:
 #   child - the first child generated from possible actions taken by the agent
 def expand(state):
-    possible_moves = state.board.get_possible_moves()
+    possible_moves = get_all_possible_moves(state.board)
     for move in possible_moves:
         result_board = state.board.create_new_board_from_move(move)
-        child = MCTSNode(result_board, move)
-        child.parent = state
+        child = MCTSNode(result_board, move, state)
         state.children.append(child)
     return state.children[0] if len(state.children) > 0 else None
 
@@ -115,13 +121,20 @@ def get_winner(board):
 def rollout(state, player, max_depth):
     rollout_game = deepcopy(state.board)
     moves = 0
-    while not rollout_game.get_possible_moves() and moves < max_depth:
-        possible_moves = rollout_game.get_possible_moves()
+    possible_moves = rollout_game.get_possible_moves()
+    while possible_moves != None and len(possible_moves) > 0 and moves < max_depth:
         move = random.choice(possible_moves)
         rollout_game.move_piece(move)
+        possible_moves = rollout_game.get_possible_moves()
+        moves += 1
 
     winner = get_winner(rollout_game)
-    return 1 if winner == player else (0.5 if winner == None else 0)
+    if winner == 1:
+        return 1
+    elif winner == 2:
+        return 0
+    else:
+        return 0.5
 
 #backpropagation. traverse back up the tree.  increment times visited.  add rollout result to total result 
 def backpropagate(state, value):
@@ -138,11 +151,12 @@ def backpropagate(state, value):
 #   s - A game state to be evaluated
 # Return values:
 #   result - the UCB1 score for the state s
-def ucb1(s):
+def ucb1(s, total_simulations):
     if s.n == 0:
         return float("inf")
-    
-    total_simulations = mcts_root.n if mcts_root.n > 0 else 1
+    #total_simulations = mcts_root.n if mcts_root.n > 0 else 1
+    if total_simulations <= 0:
+        total_simulations = 1
     num_visited = s.n
     avg_score = s.t / num_visited
     expl_constant = 2
@@ -150,5 +164,4 @@ def ucb1(s):
     result = avg_score + expl_constant * math.sqrt((math.log(total_simulations)/num_visited))
     return result
 
-# create root and start
-mcts_root = MCTSNode(Board(), None)
+mcts_root = None

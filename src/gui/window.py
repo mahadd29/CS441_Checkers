@@ -13,6 +13,7 @@ class GameWindow:
 
         self.square_size = self.resolution/8
         self.piece_radius = (self.square_size / 2) - (0.2 * self.square_size)
+        
 
     # Display the given state on the board
     def update(self, state):
@@ -26,9 +27,14 @@ class GameWindow:
         
         # Game pieces
         for piece in state.pieces:
-            col = ((32 - piece.position) % 4) * 2 * self.square_size + self.square_size/2 + ((((32 -piece.position) // 4) + 1)%2) * self.square_size
-            row = ((32 -  piece.position) // 4)  * self.square_size + self.square_size/2 
-            center = (col, row)
-            pygame.draw.circle(self.window, (255, 255, 255) if piece.player == 1 else (50, 50, 50), center, self.piece_radius)
+            if piece.position == None:
+                continue
 
+            col = ((32-piece.position) % 4) * 2 * self.square_size + self.square_size/2 + ((((32 - piece.position) // 4) + 1)%2) * self.square_size
+            row = ((32-piece.position) // 4)  * self.square_size + self.square_size/2 
+            center = (col, row)
+            color = (255, 255, 255)
+            if piece.player != 1:
+                color = (50, 50, 50)
+            pygame.draw.circle(self.window, color, center, self.piece_radius)
         pygame.display.update()
