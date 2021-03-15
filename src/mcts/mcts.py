@@ -27,12 +27,14 @@ class MCTSNode:
 
 # main loop (currently pseudocode)
 def mcts(root):
-    simulation_limit = 25
+    simulation_limit = 100
     while simulation_limit > 0:
         leaf = traverse(root, root.n)
         if leaf.n != 0:
             leaf = expand(leaf)
-        simulation_result = rollout(leaf, 1, 10)
+            if leaf == None:
+                break
+        simulation_result = rollout(leaf, 1, 50)
         backpropagate(leaf, simulation_result)
         simulation_limit -= 1
         
@@ -42,7 +44,6 @@ def mcts(root):
         if child.n > best_n:
             best_child = child
             best_n = child.n
-    print(str(best_child.t) + "/" + str(best_child.n))
     return (best_child, best_child.action)
     
 
@@ -71,6 +72,13 @@ def traverse(state, total_simulations):
         state = next_child(state, total_simulations)
     return state
 
+# Gets the possible moves from a current state
+# Parameters:
+#   board - the board at an input state
+# Return values:
+#   actions - a list of all the actions that can be taken from the state
+def get_all_possible_moves(board):
+    return board.get_possible_capture_moves() + board.get_possible_positional_moves()
 
 # Expansion
 # Steps:
@@ -81,7 +89,7 @@ def traverse(state, total_simulations):
 # Return values:
 #   child - the first child generated from possible actions taken by the agent
 def expand(state):
-    possible_moves = state.board.get_possible_moves()
+    possible_moves = get_all_possible_moves(state.board)
     for move in possible_moves:
         result_board = state.board.create_new_board_from_move(move)
         child = MCTSNode(result_board, move, state)
@@ -121,7 +129,12 @@ def rollout(state, player, max_depth):
         moves += 1
 
     winner = get_winner(rollout_game)
-    return 1 if winner == player else (0.5 if winner == None else 0)
+    if winner == 1:
+        return 1
+    elif winner == 2:
+        return 0
+    else:
+        return 0.5
 
 #backpropagation. traverse back up the tree.  increment times visited.  add rollout result to total result 
 def backpropagate(state, value):

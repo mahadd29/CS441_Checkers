@@ -1,5 +1,5 @@
 
-from mcts.mcts import mcts, mcts_root, MCTSNode
+from mcts.mcts import mcts, mcts_root, MCTSNode, get_all_possible_moves
 from gui.window import GameWindow
 from checkers.game import Game
 
@@ -9,46 +9,50 @@ import time
 
 def find_state(tree, board):
     for child in tree.children:
-        if board.position_count == child.board.position_count and board.position_layout == child.board.position_layout:
+        if board.searcher.player_positions == child.board.searcher.player_positions:
             return child
     return None
+
+def custom_move_function(game, move):
+    if move not in get_all_possible_moves(game.board):
+        raise ValueError('The provided move is not possible')
+
+    game.board = game.board.create_new_board_from_move(move)
+    game.moves.append(move)
+    game.moves_since_last_capture = 0 if game.board.previous_move_was_capture else game.moves_since_last_capture + 1
 
 def main():
     game = Game()
 
     window = GameWindow(800)
-
     mcts_root = MCTSNode(game.board, None, None)
-    next_root = None
-
     move_count = 0
     window.update(game.board)
     while True:
         window.clock.tick(60)
+        window.update(game.board)
         
+        if game.move_limit_reached() or len(get_all_possible_moves(game.board)) == 0:
+            break
         
-        # MCTS is "player 1, white"
         if game.whose_turn() == 1:
             (node, move) = mcts(mcts_root)
-            print(game.get_possible_moves())
-            print(move)
-            game.move(move)
-            next_root = node
-            window.update(game.board)
+            print("MCTS chooses node with " + str(node.t) + "/" + str(node.n) + " score")
+            custom_move_function(game, move)
+            mcts_root = node
         
-        # Random move chosen by opponent for now
-        # Player 2 is black
         else:
-            possible_moves = game.get_possible_moves()
+            possible_moves = get_all_possible_moves(game.board)
             move = random.choice(possible_moves)
-            game.move(move)
-            mcts_root = find_state(next_root, game.board)
+            custom_move_function(game, move)
             time.sleep(0.25)
-            window.update(game.board)
-                
-                
+            next_mcts_start = find_state(mcts_root, game.board)
+            mcts_root = next_mcts_start if next_mcts_start != None else MCTSNode(game.board, None, None)
 
         move_count += 1
+    
+    winner = game.get_winner()
+    print("Game completed in " + str(move_count) + " moves. Winner is " + ("MCTS" if winner == 1 else "Minimax" if winner == 2 else "No one"))
 
 if __name__ == "__main__":
     main()
