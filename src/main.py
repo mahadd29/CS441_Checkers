@@ -8,5 +8,3 @@ print(game)
 
 #initialize agents
 mcts(mcts_root)
-
-print(mcts_root)
