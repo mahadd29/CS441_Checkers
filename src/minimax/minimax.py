@@ -7,6 +7,7 @@ from checkers.game import Game
 import copy
 import numpy as np
 import time
+import random
 
 # minimax(s) =
 # {
@@ -63,7 +64,7 @@ def h1_total_pieces(game_board):
             p2_count = p2_count + 1.0
    if p2_count < 1.0:
        return p1_count
-   return (p1_count/p2_count)
+   return (p1_count - p2_count)
 
 def h2_kings_and_reg(game_board):
    p1_points = p2_points = 0.0
@@ -72,16 +73,25 @@ def h2_kings_and_reg(game_board):
    for p1, p2 in zip(p1_pieces, p2_pieces):
        if not p1.captured:
            if p1.king:
-               p1_points = p1_points + 5.0
-           else: p1_points = p1_points + 3.0
+               p1_points = p1_points + 10.0
+           else: p1_points = p1_points + 1.0
        if not p2.captured:
            if p2.king:
-               p2_points = p2_points + 5.0
-           else: p2_points = p2_points + 3.0
+               p2_points = p2_points + 10.0
+           else: p2_points = p2_points + 1.0
    if p2_points < 1.0:
        return p1_points
-   return (p1_points/p2_points)
+   return (p1_points - p2_points)
 
+def h3_capture_zone(game):
+    num_of_cap = len(game.board.get_possible_capture_moves())
+    if game.whose_turn == 1:
+        if num_of_cap > 1:
+            return num_of_cap
+        else: return 0
+    return num_of_cap*-2
+        
+    
 def min_value(game, depth, alpha, beta):
     if game.is_over():
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
@@ -94,7 +104,7 @@ def min_value(game, depth, alpha, beta):
         else:
             return 0
     if depth == MAX_DEPTH:
-        return (h1_total_pieces(game) + h2_kings_and_reg(game))
+        return (h1_total_pieces(game) + h2_kings_and_reg(game) + h3_capture_zone(game))
 
     minVal = 100000
 
@@ -126,7 +136,7 @@ def max_value(game, depth, alpha, beta):
         else:
             return 0
     if depth == MAX_DEPTH:
-        return (h1_total_pieces(game) + h2_kings_and_reg(game))
+        return (h1_total_pieces(game) + h2_kings_and_reg(game) + h3_capture_zone(game))
 
     maxVal = -100000
     #chosen_move = None
@@ -152,7 +162,7 @@ def minimax(game):
     for a in game.get_possible_moves():
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
-        compare = max_value(next_move,0, -100000, 100000)
+        compare = min_value(next_move,0, -100000, 100000)
         if compare > max_score:
             max_score = compare
             move = a
@@ -198,23 +208,7 @@ def board_mapping(p):
     if p == 31: return 7, 4
     if p == 32: return 7, 6
     
-    
-    
-def display(game):
-    board = np.zeros(64).astype(int)
-    board = board.reshape(8,8)
-    for piece in game.board.pieces:
-        if not piece.captured:
-            x, y = board_mapping(piece.position)
-            if piece.player == 1:
-                if piece.king:
-                    board[x][y] = 10
-                else: board[x][y] = 1
-            elif piece.king:
-                board[x][y] = 20
-            else: board[x][y] = 2
-    print(board)
-    
+
 def display_move(game, move):
     origin_x, origin_y = board_mapping(move[0]) 
     dest_x, dest_y = board_mapping(move[1]) 
@@ -244,17 +238,30 @@ def display_move(game, move):
 
 if __name__ == "__main__":
     game1 = Game()
-
-  
+   
+    # while(not game1.is_over()):
+    #     start = time.time()
+    #     next_move = minimax(game1)
+    #     print("For depth " + str(MAX_DEPTH) + ", ", end="")
+    #     print("time to find next move is " + str(time.time() - start) + ". ", end=" ")
+    #     print("Taking move: " + str(next_move))
+    #     game1.move(next_move)
+    #     display_move(game1, next_move)
+    player1 = None
+    player2 = None
+    p2_moves = None
     while(not game1.is_over()):
-        start = time.time()
-        next_move = minimax(game1)
-        print("For depth " + str(MAX_DEPTH) + ", ", end="")
-        print("time to find next move is " + str(time.time() - start) + ". ", end=" ")
-        print("Taking move: " + str(next_move))
-        game1.move(next_move)
-        break
-        display_move(game1, next_move)
-    
+        player1 = minimax(game1)
+        game1.move(player1)
+        print("player1")
+        display_move(game1, player1)
+        if game1.is_over():
+            break
+        p2_moves = game1.get_possible_moves()
+        player2 = random.choice(p2_moves)
+        game1.move(player2)
+        print("player2")
+        display_move(game1, player2)
+        
     print("game winner: "+ str(game1.get_winner()))
         
