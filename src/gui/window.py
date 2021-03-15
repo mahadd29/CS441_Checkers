@@ -5,6 +5,8 @@ from checkers.board_searcher import BoardSearcher
 
 class GameWindow:
     def __init__(self, resolution):
+        pygame.init()
+        pygame.font.init()
         self.window = pygame.display.set_mode((resolution, resolution))
         pygame.display.set_caption("Checkers")
 
@@ -13,6 +15,7 @@ class GameWindow:
 
         self.square_size = self.resolution/8
         self.piece_radius = (self.square_size / 2) - (0.2 * self.square_size)
+        
 
     # Display the given state on the board
     def update(self, state):
@@ -26,9 +29,12 @@ class GameWindow:
         
         # Game pieces
         for piece in state.pieces:
-            col = ((piece.position-1) % 4) * 2 * self.square_size + self.square_size/2 + ((((piece.position-1) // 4) + 1)%2) * self.square_size
-            row = ((piece.position-1) // 4)  * self.square_size + self.square_size/2 
+            if piece.position == None:
+                continue
+
+            col = ((32-piece.position) % 4) * 2 * self.square_size + self.square_size/2 + ((((32 - piece.position) // 4) + 1)%2) * self.square_size
+            row = ((32-piece.position) // 4)  * self.square_size + self.square_size/2 
             center = (col, row)
-            pygame.draw.circle(self.window, (50, 50, 50) if piece.player == 1 else (255, 255, 255), center, self.piece_radius)
+            pygame.draw.circle(self.window, (50, 50, 50) if piece.player == 2 else (255, 255, 255), center, self.piece_radius)
 
         pygame.display.update()
