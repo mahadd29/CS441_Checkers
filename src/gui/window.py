@@ -26,9 +26,9 @@ class GameWindow:
         
         # Game pieces
         for piece in state.pieces:
-            col = ((piece.position-1) % 4) * 2 * self.square_size + self.square_size/2 + ((((piece.position-1) // 4) + 1)%2) * self.square_size
-            row = ((piece.position-1) // 4)  * self.square_size + self.square_size/2 
+            col = ((32 - piece.position) % 4) * 2 * self.square_size + self.square_size/2 + ((((32 -piece.position) // 4) + 1)%2) * self.square_size
+            row = ((32 -  piece.position) // 4)  * self.square_size + self.square_size/2 
             center = (col, row)
-            pygame.draw.circle(self.window, (50, 50, 50) if piece.player == 1 else (255, 255, 255), center, self.piece_radius)
+            pygame.draw.circle(self.window, (255, 255, 255) if piece.player == 1 else (50, 50, 50), center, self.piece_radius)
 
         pygame.display.update()
