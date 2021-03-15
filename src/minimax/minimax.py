@@ -51,7 +51,7 @@ import random
 # function Terminal-Test(state) returns True or False
 #   return game.is_over()
 
-MAX_DEPTH = 4
+MAX_DEPTH = 5
 
 def h1_total_pieces(game_board):
    p1_count = p2_count = 0.0
@@ -83,16 +83,16 @@ def h2_kings_and_reg(game_board):
        return p1_points
    return (p1_points - p2_points)
 
-def h3_capture_zone(game):
-    num_of_cap = len(game.board.get_possible_capture_moves())
-    if game.whose_turn == 1:
-        if num_of_cap > 1:
-            return num_of_cap
-        else: return 0
-    return num_of_cap*-3
+# def h3_capture_zone(game):
+#     num_of_cap = len(game.board.get_possible_capture_moves())
+#     if game.whose_turn == 1:
+#         if num_of_cap > 1:
+#             return num_of_cap
+#         else: return 0
+#     return num_of_cap*-3
         
     
-def min_value(game, depth, alpha, beta):
+def min_value(game, depth, alpha, beta, version):
     if game.is_over():
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
         ret = game.get_winner()
@@ -104,7 +104,10 @@ def min_value(game, depth, alpha, beta):
         else:
             return 0
     if depth == MAX_DEPTH:
-        return (h1_total_pieces(game) + h2_kings_and_reg(game) + h3_capture_zone(game))
+        if version:
+            return (h1_total_pieces(game) + h2_kings_and_reg(game))
+        else:
+            return h1_total_pieces(game)
 
     minVal = 100000
 
@@ -115,7 +118,7 @@ def min_value(game, depth, alpha, beta):
         #print(game.get_possible_moves())
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
-        compare = max_value(next_move, depth+1, alpha, beta)
+        compare = max_value(next_move, depth+1, alpha, beta, version)
         if compare < minVal:
             minVal = compare
         beta = min(beta, minVal)
@@ -124,7 +127,7 @@ def min_value(game, depth, alpha, beta):
     return minVal
 
 # returns a utility value
-def max_value(game, depth, alpha, beta):
+def max_value(game, depth, alpha, beta, version):
     if game.is_over():
         #return h1_total_pieces(game) + h2_kings_and_reg(game)
         ret = game.get_winner()
@@ -136,8 +139,10 @@ def max_value(game, depth, alpha, beta):
         else:
             return 0
     if depth == MAX_DEPTH:
-        return (h1_total_pieces(game) + h2_kings_and_reg(game) + h3_capture_zone(game))
-
+        if version:
+            return (h1_total_pieces(game) + h2_kings_and_reg(game))
+        else:
+            return h1_total_pieces(game)
     maxVal = -100000
     #chosen_move = None
     
@@ -147,7 +152,7 @@ def max_value(game, depth, alpha, beta):
         #print(game.get_possible_moves())
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
-        compare = min_value(next_move, depth+1, alpha, beta)
+        compare = min_value(next_move, depth+1, alpha, beta, version)
         if compare > maxVal:                    
             maxVal = compare
         alpha = max(alpha, maxVal)
@@ -155,14 +160,16 @@ def max_value(game, depth, alpha, beta):
             break   
             #chosen_move = next_move
     return maxVal
-
-def minimax(game):
+#version is a boolean. 
+#0 version of the game just uses the h1 heuristic, which is just the number of pieces each player has
+#1 version of the game uses both h1 and h2. h2 gives more points for kings.
+def minimax(game, version):
     max_score = -10000
     move = None
     for a in game.get_possible_moves():
         game_copy = copy.deepcopy(game)
         next_move = game_copy.move(a)
-        compare = min_value(next_move,0, -100000, 100000)
+        compare = min_value(next_move,0, -100000, 100000, version)
         if compare > max_score:
             max_score = compare
             move = a
@@ -251,7 +258,7 @@ if __name__ == "__main__":
     player2 = None
     p2_moves = None
     while(not game1.is_over()):
-        player1 = minimax(game1)
+        player1 = minimax(game1, 0)
         game1.move(player1)
         print("player1")
         display_move(game1, player1)

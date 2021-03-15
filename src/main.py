@@ -44,7 +44,7 @@ def main():
             print("MCTS chooses node with " + str(mcts_child.t) + "/" + str(mcts_child.n) + " score")
         
         else:
-            minimax_move = minimax(game)
+            minimax_move = minimax(game, 0)
             custom_move_function(game, minimax_move)
             next_mcts_start = find_state(mcts_root, game.board)
             mcts_root = next_mcts_start if next_mcts_start != None else MCTSNode(game.board, None, None)
