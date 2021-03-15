@@ -37,5 +37,4 @@ class GameWindow:
             if piece.player != 1:
                 color = (50, 50, 50)
             pygame.draw.circle(self.window, color, center, self.piece_radius)
-
         pygame.display.update()

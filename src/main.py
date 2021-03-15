@@ -27,6 +27,7 @@ def main():
     window = GameWindow(800)
     mcts_root = MCTSNode(game.board, None, None)
     move_count = 0
+
     window.update(game.board)
     while True:
         window.clock.tick(60)
