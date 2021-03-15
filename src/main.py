@@ -46,7 +46,6 @@ def main():
         else:
             minimax_move = minimax(game)
             custom_move_function(game, minimax_move)
-            time.sleep(0.25)
             next_mcts_start = find_state(mcts_root, game.board)
             mcts_root = next_mcts_start if next_mcts_start != None else MCTSNode(game.board, None, None)
             print("Minimax chooses a move")

@@ -51,7 +51,7 @@ import random
 # function Terminal-Test(state) returns True or False
 #   return game.is_over()
 
-MAX_DEPTH = 5
+MAX_DEPTH = 4
 
 def h1_total_pieces(game_board):
    p1_count = p2_count = 0.0
@@ -89,7 +89,7 @@ def h3_capture_zone(game):
         if num_of_cap > 1:
             return num_of_cap
         else: return 0
-    return num_of_cap*-2
+    return num_of_cap*-3
         
     
 def min_value(game, depth, alpha, beta):
