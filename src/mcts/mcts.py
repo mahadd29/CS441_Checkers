@@ -11,7 +11,10 @@
 
 #imports
 import math
+import random
+from copy import deepcopy
 from checkers.board import Board
+
 
 #state node class
 class MCTSNode:
@@ -25,14 +28,24 @@ class MCTSNode:
 
 # main loop (currently pseudocode)
 def mcts(root):
-    simulation_limit = 10
+    simulation_limit = 1000
     while(simulation_limit >= 0):
         leaf = traverse(root)
         if leaf.n != 0:
             leaf = expand(leaf)
-        simulation_result = rollout(leaf)            
+        simulation_result = rollout(leaf, 1, 10000)            
         backpropagate(leaf, simulation_result)
         simulation_limit -= 1
+    
+    best_child = None
+    best_n = -1
+    for child in root.children:
+        if child.n > best_n:
+            best_child = child
+            best_n = child.n
+    print(str(best_child.t) + "/" + str(best_child.n))
+    return best_child.action
+    
 
 #find child with the highest ubc1
 def next_child(parent):
@@ -59,8 +72,6 @@ def traverse(state):
         state = next_child(state)
     return state
 
-def apply_action(state, action):
-    return 
 
 # Expansion
 # Steps:
@@ -79,6 +90,19 @@ def expand(state):
         state.children.append(child)
     return state.children[0] if len(state.children) > 0 else None
 
+# Get the winner of a game
+# Parameters:
+#   state - the input state
+# Return values
+#   winner - the winning player or None if no winner
+def get_winner(board):
+		if board.player_turn == 1 and not board.count_movable_player_pieces(1):
+			return 2
+		elif board.player_turn == 2 and not board.count_movable_player_pieces(2):
+			return 1
+		else:
+			return None
+
 # Rollout
 # Steps:
 #   - Simulate a random game
@@ -87,9 +111,17 @@ def expand(state):
 # Parameters:
 #   state - the current game state
 # Return value:
-#   state - state after applying the rollout
-def rollout(state):
-    return 1
+#   winner - winner of the simulated game
+def rollout(state, player, max_depth):
+    rollout_game = deepcopy(state.board)
+    moves = 0
+    while not rollout_game.get_possible_moves() and moves < max_depth:
+        possible_moves = rollout_game.get_possible_moves()
+        move = random.choice(possible_moves)
+        rollout_game.move_piece(move)
+
+    winner = get_winner(rollout_game)
+    return 1 if winner == player else (0.5 if winner == None else 0)
 
 #backpropagation. traverse back up the tree.  increment times visited.  add rollout result to total result 
 def backpropagate(state, value):
