@@ -51,7 +51,8 @@ import random
 # function Terminal-Test(state) returns True or False
 #   return game.is_over()
 
-MAX_DEPTH = 5
+MAX_DEPTH = 6
+
 
 def h1_total_pieces(game_board):
    p1_count = p2_count = 0.0

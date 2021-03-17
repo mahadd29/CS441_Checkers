@@ -12,6 +12,9 @@ import datetime
 import time
 import csv
 
+import sys
+
+
 def find_state(tree, board):
     for child in tree.children:
         if board.searcher.player_positions == child.board.searcher.player_positions:
@@ -27,26 +30,35 @@ def custom_move_function(game, move):
     game.moves_since_last_capture = 0 if game.board.previous_move_was_capture else game.moves_since_last_capture + 1
 
 def main():
+    if len(sys.argv) == 3:
+        mcts_policy = bool(sys.argv[1] == "ucb1")
+        minimax_heuristic = bool(sys.argv[2] == "h1h2")
+    else:
+        print("usage: python main.py <random/ucb1> <h1h2/h1>")
+        return
+    
     filename = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-    csvfile = open(str(filename) + '.csv', 'w', newline='')
+    mcts_label = "mcts_ucb1_" if mcts_policy else "mcts_randompolicy_"
+    minimax_label = "minimax_h1h2_" if minimax_heuristic else "minimax_h1_"
+    csvfile = open(mcts_label + minimax_label + str(filename) + '.csv', 'w', newline='')
     fieldnames = ['per game:', 'minimax win (1/0)',	'mcts win (1/0)', 'total time (s)',	'number of moves', 'minimax avg time per move (s)', 'mcts avg time per move (s)', 'minimax pieces left', 'mcts pieces left' ]  
     header_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     header_writer.writeheader()
     csvfile.close()
     
-    for _ in range(0, 10):
-        with open(str(filename) + '.csv', 'a', newline='') as file:
+    for _ in range(0, 20):
+        with open(mcts_label + minimax_label + str(filename) + '.csv', 'a', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=fieldnames)
-            game_instance(writer)
+            game_instance(writer, mcts_policy, minimax_heuristic)
         
-def game_instance(csvlog_writer):
+def game_instance(csvlog_writer, mcts_policy, minimax_heuristic):
 
     game = Game()
 
     # Set a conservative consecutive noncapture move limit to speed up gameplay
-    game.consecutive_noncapture_move_limit = 10
+    game.consecutive_noncapture_move_limit = 40
 
-    # window = GameWindow(800)
+    window = GameWindow(800)
     mcts_root = MCTSNode(game.board, None, None)
 
     mcts_move_count = 0
@@ -55,18 +67,15 @@ def game_instance(csvlog_writer):
     minimax_move_count = 0
     minimax_move_times = {}
 
-    # window.update(game.board)
+    window.update(game.board)
     start_time = time.time()
-    while True:
-        #window.clock.tick(60)
-        #window.update(game.board)
-        
-        if game.move_limit_reached() or len(get_all_possible_moves(game.board)) == 0:
-            break
+    while not game.move_limit_reached() and len(get_all_possible_moves(game.board)) != 0:
+        window.clock.tick(60)
+        window.update(game.board)
         
         if game.whose_turn() == 1:
             mcts_move_start_time = time.time()
-            (mcts_child, mcts_move) = mcts(mcts_root)
+            (mcts_child, mcts_move) = mcts(mcts_root, mcts_policy)
             mcts_turn_time = time.time() - mcts_move_start_time
             mcts_move_times[mcts_move_count] = mcts_turn_time
 
@@ -77,7 +86,7 @@ def game_instance(csvlog_writer):
         
         else:
             minimax_move_start_time = time.time()
-            minimax_move = minimax(game, 0)
+            minimax_move = minimax(game, minimax_heuristic)
             minimax_turn_time = time.time() - minimax_move_start_time
             minimax_move_times[minimax_move_count] = minimax_turn_time
 

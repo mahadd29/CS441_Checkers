@@ -26,15 +26,15 @@ class MCTSNode:
         self.children = []
 
 # main loop (currently pseudocode)
-def mcts(root):
-    simulation_limit = 100
+def mcts(root, policy_type):
+    simulation_limit = 500
     while simulation_limit > 0:
-        leaf = traverse(root, root.n)
+        leaf = traverse(root, root.n, policy_type)
         if leaf.n != 0:
             leaf = expand(leaf)
             if leaf == None:
                 break
-        simulation_result = rollout(leaf, 1, 50)
+        simulation_result = rollout(leaf, 1, 200)
         backpropagate(leaf, simulation_result)
         simulation_limit -= 1
         
@@ -44,18 +44,22 @@ def mcts(root):
         if child.n > best_n:
             best_child = child
             best_n = child.n
+        elif child.n == best_n:
+            if bool(random.getrandbits(1)):
+                best_child = child
+                best_n = child.n
     return (best_child, best_child.action)
     
 
 #find child with the highest ubc1
-def next_child(parent, total_simulations):
+def next_child(parent, total_simulations, policy_type):
     #should not hit this if statement.  add better error checking
     if(len(parent.children) == 0):
         return None
     highest = -1
     next_child = None
     for n in parent.children:
-        n_val = ucb1(n, total_simulations)
+        n_val = ucb1(n, total_simulations) if policy_type else random_policy(n)
         if ( n_val > highest):
             highest = n_val
             next_child = n
@@ -67,9 +71,9 @@ def next_child(parent, total_simulations):
 # Return values:
 #   state - returns the current node if it has no children to traverse to
 #   best child - returns the child with the highest UCB1 score
-def traverse(state, total_simulations):
+def traverse(state, total_simulations, policy_type):
     while(len(state.children) != 0):
-        state = next_child(state, total_simulations)
+        state = next_child(state, total_simulations, policy_type)
     return state
 
 # Gets the possible moves from a current state
@@ -146,7 +150,16 @@ def backpropagate(state, value):
         parent = parent.parent
     return value
 
-# Basic ucb1 implementation
+
+# Random search policy implementation
+# Parameters:
+#   state - a game state to be evaluated
+# Return values:
+#   result - the "score", a random value between 0 and 50
+def random_policy(s):
+    return random.randint(1,50)
+
+# Basic ucb1 search policy implementation
 # Parameters:
 #   s - A game state to be evaluated
 # Return values:
