@@ -58,7 +58,7 @@ def game_instance(csvlog_writer, mcts_policy, minimax_heuristic):
     # Set a conservative consecutive noncapture move limit to speed up gameplay
     game.consecutive_noncapture_move_limit = 40
 
-    window = GameWindow(800)
+    #window = GameWindow(800)
     mcts_root = MCTSNode(game.board, None, None)
 
     mcts_move_count = 0
@@ -67,11 +67,11 @@ def game_instance(csvlog_writer, mcts_policy, minimax_heuristic):
     minimax_move_count = 0
     minimax_move_times = {}
 
-    window.update(game.board)
+    #window.update(game.board)
     start_time = time.time()
     while not game.move_limit_reached() and len(get_all_possible_moves(game.board)) != 0:
-        window.clock.tick(60)
-        window.update(game.board)
+        #window.clock.tick(60)
+        #window.update(game.board)
         
         if game.whose_turn() == 1:
             mcts_move_start_time = time.time()
